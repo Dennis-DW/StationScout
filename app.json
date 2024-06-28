@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "StationScout",
+    "slug": "StationScout",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show places near you.",
+        "NSLocationAlwaysUsageDescription": "This app needs access to your location to show places near you."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "INTERNET"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "REACT_NATIVE_CLERK_PUBLISHABLE_KEY": "pk_test_ZGlzdGluY3QtZmFsY29uLTE5LmNsZXJrLmFjY291bnRzLmRldiQ"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow StationScout App to use your location."
+        }
+      ]
+    ]
+  }
+}
