@@ -1,22 +1,19 @@
-import { StyleSheet, View, Image } from 'react-native';
 import React, { useContext } from 'react';
+import { StyleSheet, View, Image } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import MapViewStyles from '../../utils/MapViewStyles.json';
+import MapViewStyles from '../../utils/MapViewStyles.json'; 
 import { UserLocation } from '../../Context/UserLocation';
+import Markers from '../../Components/Markers';
 
-const AppMapView = () => {
+const AppMapView = ({ placeList }) => {
     const { location } = useContext(UserLocation);
-
-    if (!location?.latitude) {
-        return null;
-    }
 
     return (
         <View style={styles.container}>
             <MapView
                 style={styles.map}
                 provider={PROVIDER_GOOGLE}
-                customMapStyle={MapViewStyles}
+                customMapStyle={MapViewStyles} 
                 initialRegion={{
                     latitude: location.latitude,
                     longitude: location.longitude,
@@ -24,14 +21,19 @@ const AppMapView = () => {
                     longitudeDelta: 0.0421,
                 }}
             >
-                <Marker
-                    coordinate={{
-                        latitude: location.latitude,
-                        longitude: location.longitude,
-                    }}
-                >
-                    <Image source={require('../../../assets/images/FuelMarker.jpg')} style={styles.markerImage} />
-                </Marker>
+                {location && (
+                    <Marker
+                        coordinate={{
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                        }}
+                    >
+                        <Image source={require('../../../assets/images/FuelMarker.jpg')} style={styles.markerImage} />
+                    </Marker>
+                )}
+                {placeList && placeList.map((item, index) => (
+                    <Markers key={index} index={index} place={item} />
+                ))}
             </MapView>
         </View>
     );
@@ -50,8 +52,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     markerImage: {
-        width: 40, 
+        width: 40,
         height: 40,
     },
 });
-

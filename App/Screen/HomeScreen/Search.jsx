@@ -3,9 +3,9 @@ import { View, StyleSheet } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Colors from '../../utils/Colors';
 import IonIcons from 'react-native-vector-icons/Ionicons';
+import { GOOGLE_PLACES_API_KEY } from '@env';
 
 const Search = ({ searchedLocation }) => {
-  const GOOGLE_PLACES_API_KEY = "AIzaSyB73YMlK115nsTlQdBT5K3ie_lIGNrVeJo";
   return (
     <View style={styles.container}>
       <IonIcons name="location-sharp" size={25}
@@ -19,12 +19,10 @@ const Search = ({ searchedLocation }) => {
           // 'details' is provided when fetchDetails = true
           // console.log(data, details);
           // Handle selected location
-          searchedLocation({
-            description: data.description,
-            geometry: details.geometry.location,
-          });
+          searchedLocation(
+            details?.geometry.location
+          );
         }}
-
         query={{
           key: GOOGLE_PLACES_API_KEY,
           language: 'en',
@@ -51,6 +49,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 2,
     backgroundColor: Colors.WHITE,
+    alignItems: 'center',
   },
   textInput: {
     height: 35,

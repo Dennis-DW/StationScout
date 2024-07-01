@@ -21,7 +21,7 @@ const Header = () => {
                     style={styles.logo} 
                 />
             </View>
-            <FontAwesome name="globe" size={32} color="black" style={styles.filterIcon} />
+            <FontAwesome name="globe" size={32} color="white" style={styles.filterIcon} />
         </View>
     );
 };

@@ -4,11 +4,15 @@ import { View, StyleSheet } from 'react-native';
 import { Header, AppMapView, Search, PlaceListView } from './index';
 import { UserLocation } from '../../Context/UserLocation';
 import GlobalApi from '../../utils/GlobalApi';
+import { SelectMarkerContext } from '../../Context/SelectMarkerContext';
+
+
 
 const HomeScreen = () => {
 
   const { location, setLocation } = useContext(UserLocation);
   const [placeList, setPlaceList] = useState([]);
+  const [ selectedMarker, setSelectedMarker ] = useState(null);
 
   useEffect(() => {
     if (location) {
@@ -49,18 +53,32 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Header />
-        <Search searchedLocation={(loc) => setLocation(loc.geometry)} />
+    <SelectMarkerContext.Provider value={{
+      selectedMarker,
+      setSelectedMarker
+
+
+    }}>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Header />
+          <Search searchedLocation={(location) => 
+            // console.log(location)
+            setLocation({
+              latitude: location.lat,
+              longitude: location.lng
+            
+            })
+            } />
+        </View>
+        {placeList && <AppMapView placeList={placeList} />}
+        <View style={styles.placeListContainer}>
+          {placeList && <PlaceListView
+            placeList={placeList}
+          />}
+        </View>
       </View>
-      <AppMapView />
-      <View style={styles.placeListContainer}>
-        {placeList && <PlaceListView
-          placeList={placeList}
-        />}
-      </View>
-    </View>
+    </SelectMarkerContext.Provider >
   );
 };
 
