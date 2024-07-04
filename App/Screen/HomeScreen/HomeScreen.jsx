@@ -6,8 +6,6 @@ import { UserLocation } from '../../Context/UserLocation';
 import GlobalApi from '../../utils/GlobalApi';
 import { SelectMarkerContext } from '../../Context/SelectMarkerContext';
 
-
-
 const HomeScreen = () => {
 
   const { location, setLocation } = useContext(UserLocation);
