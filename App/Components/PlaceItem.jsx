@@ -1,23 +1,20 @@
 import React from 'react';
-import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid } from 'react-native';
+import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid, Linking } from 'react-native';
 import Colors from '../utils/Colors';
 import StarRating from '../Components/StarRattings';
 import GlobalApi from '../utils/GlobalApi';
 import { LinearGradient } from 'expo-linear-gradient';
-import { FontAwesome } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { app } from "../utils/firebaseConfig"
-import { doc, setDoc, getFirestore } from "firebase/firestore";
+import { MaterialCommunityIcons, FontAwesome6 } from '@expo/vector-icons';
+import { app } from "../utils/firebaseConfig";
+import { doc, setDoc, deleteDoc, getFirestore } from "firebase/firestore";
 import { useUser } from "@clerk/clerk-expo";
-
 
 const { width } = Dimensions.get('screen');
 
-const PlaceItem = ({ place, isLiked, markedLiked }) => {
+const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
     const PLACE_PHOTO_BASE_URL = "https://places.googleapis.com/v1/";
     const { user } = useUser();
 
-    // Function to truncate name to four words
     const truncateName = (name) => {
         const words = name.split(' ');
         if (words.length > 4) {
@@ -35,10 +32,9 @@ const PlaceItem = ({ place, isLiked, markedLiked }) => {
         }
 
         try {
-            // place.id is unique and sufficient to identify the place
             await setDoc(doc(db, "liked-stations", place.id.toString()), {
-                placeId: place.id, // Store only the identifier
-                userEmail: user.primaryEmailAddress?.emailAddress // Simplified naming
+                place: place,
+                userEmail: user.primaryEmailAddress?.emailAddress
             });
             markedLiked();
             ToastAndroid.show("Liked station!", ToastAndroid.SHORT, ToastAndroid.CENTER);
@@ -52,45 +48,66 @@ const PlaceItem = ({ place, isLiked, markedLiked }) => {
         }
     };
 
+    const onRemoveLiked = async (placeId) => {
+        try {
+            await deleteDoc(doc(db, "liked-stations", place.id.toString()));
+            markedLiked();
+            ToastAndroid.show("Unliked station!", ToastAndroid.SHORT, ToastAndroid.CENTER);
+        } catch (error) {
+            console.error("Error unliking station: ", error);
+            ToastAndroid.show("Failed to unlike station", ToastAndroid.SHORT, ToastAndroid.CENTER);
+        }
+    };
+
+    const onDirection = () => {
+        const url = Platform.select({
+            ios: `maps:${place?.location?.latitude},${place?.location?.longitude}?q=${place?.formattedAddress}`,
+            android: `geo:${place?.location?.latitude},${place?.location?.longitude}?q=${place?.formattedAddress}`
+        })
+        Linking.openURL(url);
+    }
+
     return (
-        <View style={styles.container}>
-            <LinearGradient
-                colors={["transparent", "#ffffff", "#ffffff"]}
-            >
-                <Pressable
-                    style={styles.likeButton}
-                    onPress={() => onSetLiked(place)}
-                >
-                    {isLiked ? <MaterialCommunityIcons name="heart-plus" size={32} color="red" />
-                        : <MaterialCommunityIcons name="heart-plus-outline" size={32} color="white" />}
-                </Pressable>
-
-                <Image
-                    source={
-                        place?.photos?.length > 0
-                            ? { uri: `${PLACE_PHOTO_BASE_URL}${place.photos[0].name}/media?key=${GlobalApi.API_KEY}&maxHeightPx=800&maxWidthPx=1200` }
-                            : require("../../assets/images/car.png")
-                    }
-                    style={styles.image}
-                />
-
-                <View style={styles.textContainer}>
-                    <Text style={styles.name}>{truncateName(place.displayName.text)}</Text>
-                    <Text style={styles.address}>{place.shortFormattedAddress}</Text>
-                    <Text style={styles.openStatus}>
-                        {place.regularOpeningHours?.openNow ? "Open Now" : "Closed"}
-                    </Text>
-                </View>
-
-                <View style={styles.ratingContainer}>
-                    <Text style={styles.ratingText}>Rates:</Text>
-                    <StarRating rating={place.rating} />
-                    <View style={styles.iconContainer}>
-                        <FontAwesome name="street-view" size={25} color={Colors.GREEN} />
+        <Pressable onPress={onPress}>
+            <View style={styles.container}>
+                <LinearGradient colors={["transparent", "#ffffff", "#ffffff"]}>
+                    <Pressable
+                        style={styles.likeButton}
+                        onPress={() => isLiked ? onRemoveLiked(place.id) : onSetLiked(place)}
+                    >
+                        <MaterialCommunityIcons
+                            name={isLiked ? "heart-plus" : "heart-plus-outline"}
+                            size={32}
+                            color={isLiked ? "red" : "white"}
+                        />
+                    </Pressable>
+                    <Image
+                        source={
+                            place?.photos?.length > 0
+                                ? { uri: `${PLACE_PHOTO_BASE_URL}${place.photos[0].name}/media?key=${GlobalApi.API_KEY}&maxHeightPx=800&maxWidthPx=1200` }
+                                : require("../../assets/images/car.png")
+                        }
+                        style={styles.image}
+                    />
+                    <View style={styles.textContainer}>
+                        <Text style={styles.name}>{place?.displayName ? truncateName(place.displayName.text) : 'Unknown Station'}</Text>
+                        <Text style={styles.address}>{place?.shortFormattedAddress || 'No Address Available'}</Text>
+                        <Text style={styles.openStatus}>
+                            {place?.regularOpeningHours?.openNow ? "Open Now" : "Closed"}
+                        </Text>
                     </View>
-                </View>
-            </LinearGradient>
-        </View>
+                    <View style={styles.ratingContainer}>
+                        <Text style={styles.ratingText}>Rates:</Text>
+                        <StarRating rating={place?.rating || 0} />
+                        <Pressable
+                            onPress={() => onDirection()}
+                            style={styles.iconContainer}>
+                            <FontAwesome6 name="map-location-dot" size={24} color={Colors.GREY} />
+                        </Pressable>
+                    </View>
+                </LinearGradient>
+            </View>
+        </Pressable>
     );
 };
 
@@ -132,7 +149,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 15,
         marginTop: 5,
-        left:2,
+        left: 2,
     },
     ratingText: {
         fontSize: 10,
@@ -145,7 +162,6 @@ const styles = StyleSheet.create({
     },
     likeButton: {
         position: "absolute",
-        color: Colors.WHITE,
         left: 0,
         margin: 5,
     },

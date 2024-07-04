@@ -16,8 +16,6 @@ const Search = ({ searchedLocation }) => {
         fetchDetails={true}
         enablePoweredByContainer={false}
         onPress={(data, details = null) => {
-          // 'details' is provided when fetchDetails = true
-          // console.log(data, details);
           // Handle selected location
           searchedLocation(
             details?.geometry.location

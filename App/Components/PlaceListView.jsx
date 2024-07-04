@@ -28,7 +28,7 @@ const PlaceListView = ({ placeList }) => {
                 scrollToIndex(nextIndex);
                 return nextIndex;
             });
-        }, 10000);
+        }, 20000);
 
         return () => clearInterval(intervalId); // Clear interval on component unmount
     }, [placeList.length]);
@@ -73,6 +73,11 @@ const PlaceListView = ({ placeList }) => {
         }
     };
 
+    const handlePlaceItemPress = (index) => {
+        setSelectedMarker(index);
+        scrollToIndex(index);
+    };
+
     return (
         <View>
             <FlatList
@@ -86,9 +91,11 @@ const PlaceListView = ({ placeList }) => {
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item, index }) => (
                     <View style={{ width: windowWidth }} key={index}>
-                        <PlaceItem place={item}
+                        <PlaceItem
+                            place={item}
                             isLiked={isLiked(item)}
                             markedLiked={getLikedStations} // Call getLikedStations directly
+                            onPress={() => handlePlaceItemPress(index)} // Handle press event
                         />
                     </View>
                 )}
@@ -98,3 +105,4 @@ const PlaceListView = ({ placeList }) => {
 };
 
 export default PlaceListView;
+

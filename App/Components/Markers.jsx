@@ -1,11 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { StyleSheet, Image } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { SelectMarkerContext } from '../Context/SelectMarkerContext';
 
 const Markers = ({ index, place }) => {
     const { selectedMarker, setSelectedMarker } = useContext(SelectMarkerContext);
-    const [isSelected, setIsSelected] = useState(false);
 
     // Check if the current marker is selected
     const markerSelected = selectedMarker === index;
@@ -23,7 +22,6 @@ const Markers = ({ index, place }) => {
             }}
             onPress={() => {
                 setSelectedMarker(index); // Update selected marker in context
-                setIsSelected(!isSelected); // Toggle local state for selection
             }}
         >
             <Image source={markerImageSource} style={styles.markerImage} />
