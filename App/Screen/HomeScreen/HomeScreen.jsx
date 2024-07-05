@@ -1,22 +1,35 @@
-import React, { useEffect, useContext } from 'react';
-import { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect, useContext, useState } from 'react';
+import { View, StyleSheet, Keyboard } from 'react-native';
 import { Header, AppMapView, Search, PlaceListView } from './index';
 import { UserLocation } from '../../Context/UserLocation';
 import GlobalApi from '../../utils/GlobalApi';
 import { SelectMarkerContext } from '../../Context/SelectMarkerContext';
 
 const HomeScreen = () => {
-
   const { location, setLocation } = useContext(UserLocation);
   const [placeList, setPlaceList] = useState([]);
-  const [ selectedMarker, setSelectedMarker ] = useState(null);
+  const [selectedMarker, setSelectedMarker] = useState(null);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
     if (location) {
       GetNearByPlace();
     }
   }, [location]);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const GetNearByPlace = () => {
     const data = {
@@ -51,32 +64,27 @@ const HomeScreen = () => {
   };
 
   return (
-    <SelectMarkerContext.Provider value={{
-      selectedMarker,
-      setSelectedMarker
-
-
-    }}>
+    <SelectMarkerContext.Provider value={{ selectedMarker, setSelectedMarker }}>
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Header />
-          <Search searchedLocation={(location) => 
-            // console.log(location)
-            setLocation({
-              latitude: location.lat,
-              longitude: location.lng
-            
-            })
-            } />
+          <Search
+            searchedLocation={(location) =>
+              setLocation({
+                latitude: location.lat,
+                longitude: location.lng,
+              })
+            }
+          />
         </View>
         {placeList && <AppMapView placeList={placeList} />}
-        <View style={styles.placeListContainer}>
-          {placeList && <PlaceListView
-            placeList={placeList}
-          />}
-        </View>
+        {!isKeyboardVisible && placeList.length > 0 && (
+          <View style={styles.placeListContainer}>
+            <PlaceListView placeList={placeList} />
+          </View>
+        )}
       </View>
-    </SelectMarkerContext.Provider >
+    </SelectMarkerContext.Provider>
   );
 };
 

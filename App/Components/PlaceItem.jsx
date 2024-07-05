@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid, Linking } from 'react-native';
+import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid, Linking ,Platform} from 'react-native';
 import Colors from '../utils/Colors';
 import StarRating from '../Components/StarRattings';
 import GlobalApi from '../utils/GlobalApi';
@@ -8,6 +8,7 @@ import { MaterialCommunityIcons, FontAwesome6 } from '@expo/vector-icons';
 import { app } from "../utils/firebaseConfig";
 import { doc, setDoc, deleteDoc, getFirestore } from "firebase/firestore";
 import { useUser } from "@clerk/clerk-expo";
+
 
 const { width } = Dimensions.get('screen');
 
@@ -78,14 +79,14 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
                         <MaterialCommunityIcons
                             name={isLiked ? "heart-plus" : "heart-plus-outline"}
                             size={32}
-                            color={isLiked ? "red" : "white"}
+                            color={isLiked ? "red" : "black"}
                         />
                     </Pressable>
                     <Image
                         source={
                             place?.photos?.length > 0
                                 ? { uri: `${PLACE_PHOTO_BASE_URL}${place.photos[0].name}/media?key=${GlobalApi.API_KEY}&maxHeightPx=800&maxWidthPx=1200` }
-                                : require("../../assets/images/car.png")
+                                : require("../../assets/images/logoHome.png")
                         }
                         style={styles.image}
                     />
