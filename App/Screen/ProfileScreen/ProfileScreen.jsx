@@ -13,23 +13,21 @@ import {
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useUser } from '@clerk/clerk-expo';
+import { useClerk } from '@clerk/clerk-react'; // Import useClerk
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 import Geocoder from 'react-native-geocoding';
 import { app } from '../../utils/firebaseConfig';
 
 import Colors from '../../utils/Colors';
 import { UserLocation } from '../../Context/UserLocation';
-// import { GOOGLE_PLACES_API_KEY } from '@env';
-
-// // Load environment variables
-// import { config } from 'dotenv';
-// config();
+;
 
 // Initialize Geocoder with API key
 Geocoder.init(process.env.GOOGLE_PLACES_API_KEY);
 
 export default function ProfileScreen() {
-  const { user, session } = useUser();
+  const { client } = useClerk();
+  const { user } = useUser();
   const { location } = useContext(UserLocation);
   const [likedCount, setLikedCount] = useState(0);
   const [country, setCountry] = useState('');
@@ -43,6 +41,7 @@ export default function ProfileScreen() {
     { question: 'How to find nearest stations?', expanded: false, toggleLabelCollapsed: '', toggleLabelExpanded: '' },
     { question: 'How to save favorite stations?', expanded: false, toggleLabelCollapsed: '', toggleLabelExpanded: '' },
   ]);
+
   useEffect(() => {
     if (user) {
       fetchLikedStationsCount();
@@ -84,15 +83,17 @@ export default function ProfileScreen() {
     Linking.openURL(websiteUrl);
   };
 
-  const handleSignOut = async () => {
+  async function handleSignOut() {
     try {
-      await session.signOut(); // Use session.signOut() to sign out the user
-      // Navigate to your sign-in screen or perform any other actions after signing out
+      await client.signOut();
+      console.log('User signed out successfully');
+      // Redirect to login page or perform any post-signout logic here
     } catch (error) {
       console.error('Failed to sign out:', error);
       // Handle error appropriately
     }
-  };
+  }
+
 
   const toggleExpanded = (index) => {
     setFaqItems(prevItems =>
