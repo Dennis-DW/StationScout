@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -8,25 +8,52 @@ import {
   TouchableOpacity,
   Switch,
   Image,
+  Linking
 } from 'react-native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useUser } from '@clerk/clerk-expo';
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import Geocoder from 'react-native-geocoding';
 import { app } from '../../utils/firebaseConfig';
 
+import Colors from '../../utils/Colors';
+import { UserLocation } from '../../Context/UserLocation';
+// import { GOOGLE_PLACES_API_KEY } from '@env';
+
+// // Load environment variables
+// import { config } from 'dotenv';
+// config();
+
+// Initialize Geocoder with API key
+Geocoder.init(process.env.GOOGLE_PLACES_API_KEY);
+
 export default function ProfileScreen() {
-  const { user, signOut } = useUser();
+  const { user, session } = useUser();
+  const { location } = useContext(UserLocation);
   const [likedCount, setLikedCount] = useState(0);
+  const [country, setCountry] = useState('');
   const [form, setForm] = useState({
     emailNotifications: true,
     pushNotifications: false,
   });
 
+  const [faqItems, setFaqItems] = useState([
+    { question: 'How to use the app?', expanded: false, toggleLabelCollapsed: '', toggleLabelExpanded: '' },
+    { question: 'How to find nearest stations?', expanded: false, toggleLabelCollapsed: '', toggleLabelExpanded: '' },
+    { question: 'How to save favorite stations?', expanded: false, toggleLabelCollapsed: '', toggleLabelExpanded: '' },
+  ]);
   useEffect(() => {
     if (user) {
       fetchLikedStationsCount();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (location) {
+      fetchCountryName(location.latitude, location.longitude);
+    }
+  }, [location]);
 
   const fetchLikedStationsCount = async () => {
     const db = getFirestore(app);
@@ -35,85 +62,195 @@ export default function ProfileScreen() {
     setLikedCount(querySnapshot.size);
   };
 
+  const fetchCountryName = async (latitude, longitude) => {
+    try {
+      const response = await Geocoder.from(latitude, longitude);
+      const addressComponents = response.results[0].address_components;
+      const countryComponent = addressComponents.find(component =>
+        component.types.includes('country')
+      );
+      setCountry(countryComponent ? countryComponent.long_name : 'Unknown Location');
+    } catch (error) {
+      console.error(error);
+      setCountry('Unknown Location');
+    }
+  };
+
+  const handlePhonePress = (phoneNumber) => {
+    Linking.openURL(`tel:${phoneNumber}`);
+  };
+
+  const handleWebsitePress = (websiteUrl) => {
+    Linking.openURL(websiteUrl);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await session.signOut(); // Use session.signOut() to sign out the user
+      // Navigate to your sign-in screen or perform any other actions after signing out
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+      // Handle error appropriately
+    }
+  };
+
+  const toggleExpanded = (index) => {
+    setFaqItems(prevItems =>
+      prevItems.map((item, idx) => ({
+        ...item,
+        expanded: idx === index ? !item.expanded : false
+      }))
+    );
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f6f6f6' }}>
+    <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.profile}>
+          <View style={styles.profileHeader}>
+          <TouchableOpacity onPress={handleSignOut}>
+              <FontAwesome name="sign-out" size={26} color={Colors.OTHER} />
+            </TouchableOpacity>
+          </View>
           <Image
-            alt=""
-            source={{
-              uri: user.imageUrl,
-            }}
+            alt="Profile Avatar"
+            source={{ uri: user.imageUrl }}
             style={styles.profileAvatar}
           />
-
           <Text style={styles.profileName}>{user.fullName}</Text>
-          <Text style={styles.profileEmail}>{user.primaryEmailAddress?.emailAddress}</Text>
           <Text style={styles.profileCount}>Liked Stations: {likedCount}</Text>
-
-          <TouchableOpacity onPress={signOut}>
-            <View style={styles.profileAction}>
-              <Text style={styles.profileActionText}>Log Out</Text>
-              <FeatherIcon color="#fff" name="log-out" size={16} />
-            </View>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Preferences</Text>
           <View style={styles.sectionBody}>
             <View style={styles.rowWrapper}>
-              <TouchableOpacity onPress={() => {}} style={styles.row}>
+              <View style={styles.row}>
                 <View style={[styles.rowIcon, { backgroundColor: '#32c759' }]}>
                   <FeatherIcon color="#fff" name="navigation" size={20} />
                 </View>
                 <Text style={styles.rowLabel}>Location</Text>
                 <View style={styles.rowSpacer} />
-                <Text style={styles.rowValue}>Los Angeles, CA</Text>
+                <Text style={styles.rowValue}>{country}</Text>
                 <FeatherIcon color="#C6C6C6" name="chevron-right" size={20} />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notifications</Text>
-            <View style={styles.sectionBody}>
-              <View style={[styles.rowWrapper, styles.rowFirst]}>
-                <View style={styles.row}>
-                  <View style={[styles.rowIcon, { backgroundColor: '#38C959' }]}>
-                    <FeatherIcon color="#fff" name="at-sign" size={20} />
-                  </View>
-                  <Text style={styles.rowLabel}>Email Notifications</Text>
-                  <View style={styles.rowSpacer} />
-                  <Switch
-                    onValueChange={(emailNotifications) =>
-                      setForm({ ...form, emailNotifications })
-                    }
-                    value={form.emailNotifications}
-                  />
-                </View>
               </View>
+            </View>
 
-              <View style={styles.rowWrapper}>
-                <View style={styles.row}>
-                  <View style={[styles.rowIcon, { backgroundColor: '#38C959' }]}>
-                    <FeatherIcon color="#fff" name="bell" size={20} />
-                  </View>
-                  <Text style={styles.rowLabel}>Push Notifications</Text>
-                  <View style={styles.rowSpacer} />
-                  <Switch
-                    onValueChange={(pushNotifications) =>
-                      setForm({ ...form, pushNotifications })
-                    }
-                    value={form.pushNotifications}
-                  />
+            <View style={styles.rowWrapper}>
+              <View onPress={() => { }} style={styles.row}>
+                <View style={[styles.rowIcon, { backgroundColor: '#32c759' }]}>
+                  <FeatherIcon color="#fff" name="mail" size={20} />
                 </View>
+                <Text style={styles.rowLabel}>Email</Text>
+                <View style={styles.rowSpacer} />
+                <Text style={styles.rowValue}>{user.primaryEmailAddress?.emailAddress}</Text>
               </View>
             </View>
           </View>
         </View>
 
-        <Text style={styles.contentFooter}>Made with ❤️ in Seattle</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          <View style={styles.sectionBody}>
+            <View style={[styles.rowWrapper, styles.rowFirst]}>
+              <View style={styles.row}>
+                <View style={[styles.rowIcon, { backgroundColor: '#38C959' }]}>
+                  <FeatherIcon color="#fff" name="at-sign" size={20} />
+                </View>
+                <Text style={styles.rowLabel}>Email Notifications</Text>
+                <View style={styles.rowSpacer} />
+                <Switch
+                  onValueChange={(emailNotifications) =>
+                    setForm({ ...form, emailNotifications })
+                  }
+                  value={form.emailNotifications}
+                />
+              </View>
+            </View>
+
+            <View style={styles.rowWrapper}>
+              <View style={styles.row}>
+                <View style={[styles.rowIcon, { backgroundColor: '#38C959' }]}>
+                  <FeatherIcon color="#fff" name="bell" size={20} />
+                </View>
+                <Text style={styles.rowLabel}>Push Notifications</Text>
+                <View style={styles.rowSpacer} />
+                <Switch
+                  onValueChange={(pushNotifications) =>
+                    setForm({ ...form, pushNotifications })
+                  }
+                  value={form.pushNotifications}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>FAQs</Text>
+          <View style={styles.sectionBody}>
+            {faqItems.map((item, index) => (
+              <View style={styles.rowWrapper} key={index}>
+                <TouchableOpacity onPress={() => toggleExpanded(index)} style={styles.row}>
+                  <Text style={styles.rowLabel}>{item.question}</Text>
+                  <View style={styles.rowSpacer} />
+                  <FeatherIcon
+                    color="#C6C6C6"
+                    name={item.expanded ? 'chevron-down' : 'chevron-right'}
+                    size={20}
+                  />
+                </TouchableOpacity>
+                {item.expanded && (
+                  <View style={styles.expandedContent}>
+                    <Text style={styles.expandedText}>
+                      Here's how you can use the app effectively...
+                    </Text>
+                  </View>
+                )}
+                {item.expanded ? (
+                  <TouchableOpacity style={styles.toggleButton} onPress={() => toggleExpanded(index)}>
+                    <Text style={styles.toggleButtonText}>{item.toggleLabelExpanded}</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity style={styles.toggleButton} onPress={() => toggleExpanded(index)}>
+                    <Text style={styles.toggleButtonText}>{item.toggleLabelCollapsed}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ))}
+          </View>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Contact US</Text>
+          <View style={styles.sectionBody}>
+            <View style={styles.rowWrapper}>
+              <View style={styles.row}>
+                <FontAwesome name="phone" size={24} color="#32CD32" style={styles.contactIcon} />
+                <Text style={styles.rowLabel}>Phone Number</Text>
+                <View style={styles.rowSpacer} />
+                <TouchableOpacity onPress={() => handlePhonePress('+254717300173')}>
+                  <Text style={styles.rowValue}>+254717300173</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.rowWrapper}>
+              <View style={styles.row}>
+                <FontAwesome name="globe" size={24} color="#1E90FF" style={styles.contactIcon} />
+                <Text style={styles.rowLabel}>Website</Text>
+                <View style={styles.rowSpacer} />
+                <TouchableOpacity onPress={() => handleWebsitePress('https://www.stationscout.com')}>
+                  <Text style={styles.rowValue}>www.stationscout.com</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={[styles.rowWrapper, styles.row, { justifyContent: 'space-between' }]}>
+              <FontAwesome name="twitter" size={24} color="#1DA1F2" style={styles.contactIcon} />
+              <FontAwesome name="facebook" size={24} color="#3b5998" style={styles.contactIcon} />
+              <FontAwesome name="envelope" size={24} color="#c71610" style={styles.contactIcon} />
+              <FontAwesome name="instagram" size={24} color="#e1306c" style={styles.contactIcon} />
+            </View>
+          </View>
+          <Text style={styles.contentFooter}>Made with ❤️ : Denny's Wamb</Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -121,11 +258,8 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 24,
-    paddingHorizontal: 0,
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
+    flex: 1,
+    backgroundColor: Colors.GREY2,
   },
   contentFooter: {
     marginTop: 24,
@@ -134,70 +268,40 @@ const styles = StyleSheet.create({
     color: '#929292',
     textAlign: 'center',
   },
-  /** Header */
-  header: {
-    paddingHorizontal: 24,
-    marginBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1d1d1d',
-  },
-  headerSubtitle: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#929292',
-    marginTop: 6,
-  },
   /** Profile */
   profile: {
-    paddingTop: 50,
+    paddingTop: 80,
+    alignContent: 'center',
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.WHITE,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: '#e3e3e3',
   },
+  profileHeader: {
+    position: 'absolute',
+    top: 50,
+    right: 10,
+  },
   profileAvatar: {
-    width: 60,
-    height: 60,
+    width: 100,
+    height: 100,
     borderRadius: 9999,
   },
   profileName: {
     marginTop: 12,
+    fontFamily: 'Exo-SemiBold',
     fontSize: 20,
     fontWeight: '600',
-    color: '#090909',
-  },
-  profileEmail: {
-    marginTop: 6,
-    fontSize: 16,
-    fontWeight: '400',
-    color: '#848484',
+    color: Colors.BLACK,
   },
   profileCount: {
     marginTop: 6,
     fontSize: 16,
+    fontFamily: 'Exo-Regular',
     fontWeight: '400',
-    color: '#848484',
-  },
-  profileAction: {
-    marginTop: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#007bff',
-    borderRadius: 12,
-  },
-  profileActionText: {
-    marginRight: 8,
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#fff',
+    color: Colors.BLACK,
   },
   /** Section */
   section: {
@@ -205,6 +309,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginVertical: 8,
+    fontFamily: 'Exo-SemiBold',
     marginHorizontal: 24,
     fontSize: 14,
     fontWeight: '600',
@@ -223,13 +328,14 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    fontFamily: 'Exo-Regular',
     justifyContent: 'flex-start',
     paddingRight: 16,
     height: 50,
   },
   rowWrapper: {
     borderTopWidth: 1,
-    borderColor: '#e3e3e3',
+    borderColor: Colors.GREY2,
   },
   rowFirst: {
     borderTopWidth: 0,
@@ -245,7 +351,7 @@ const styles = StyleSheet.create({
   rowLabel: {
     fontSize: 17,
     fontWeight: '500',
-    color: '#000',
+    color: Colors.GREY,
   },
   rowSpacer: {
     flexGrow: 1,
@@ -255,7 +361,20 @@ const styles = StyleSheet.create({
   rowValue: {
     fontSize: 17,
     fontWeight: '500',
+    fontFamily: 'Exo-Regular',
     color: '#8B8B8B',
     marginRight: 4,
+  },
+  contactIcon: {
+    marginHorizontal: 10,
+  },
+  expandedContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 12,
+  },
+  expandedText: {
+    fontSize: 15,
+    color: '#6E6E6E',
+    marginTop: 8,
   },
 });

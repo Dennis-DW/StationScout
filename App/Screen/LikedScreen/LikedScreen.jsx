@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     padding: 10,
+    backgroundColor: Colors.WHITE,
   },
   title: {
     paddingTop: 10,

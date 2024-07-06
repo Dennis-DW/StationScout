@@ -5,24 +5,25 @@ import * as WebBrowser from 'expo-web-browser';
 import { useWarmUpBrowser } from '../../../hooks/useWarmUpBrowser';
 import { useOAuth } from '@clerk/clerk-expo';
 
+// Ensure to maybe complete any existing auth sessions
 WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = () => {
-  useWarmUpBrowser();
+  useWarmUpBrowser(); 
 
-  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
+  const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' }); 
 
   const onPress = async () => {
     try {
       const { createdSessionId, setActive } = await startOAuthFlow();
 
       if (createdSessionId) {
-        setActive({ session: createdSessionId });
+        setActive({ session: createdSessionId }); 
       } else {
         console.log('No session created. Handle MFA or additional steps here.');
       }
     } catch (err) {
-      console.error('OAuth error', err);
+      console.error('OAuth error', err); 
     }
   };
 
@@ -89,4 +90,3 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
-
