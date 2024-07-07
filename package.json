@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/clerk-expo": "^1.2.1",
+    "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-picker/picker": "^2.7.7",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",

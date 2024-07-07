@@ -8,7 +8,6 @@ import { GOOGLE_PLACES_API_KEY } from '@env';
 const Search = ({ searchedLocation }) => {
   return (
     <View style={styles.container}>
-      
       <GooglePlacesAutocomplete
         placeholder="⛽StationScout Search"
         fetchDetails={true}

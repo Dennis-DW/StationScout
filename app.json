@@ -23,7 +23,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "INTERNET"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -38,6 +42,7 @@
           "locationAlwaysAndWhenInUsePermission": "Allow StationScout App to use your location."
         }
       ]
-    ]
+    ],
+    "scheme": "stationscout"  
   }
 }

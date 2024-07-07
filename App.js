@@ -1,12 +1,11 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
+import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-expo';
 import LoginScreen from './App/Screen/LoginScreen/LoginScreen';
-import Constants from "expo-constants"
-import * as SecureStore from "expo-secure-store";
+import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 import { NavigationContainer } from '@react-navigation/native';
 import TabNavigation from './App/Navigations/TabNavigation';
 import * as Location from 'expo-location';
@@ -29,6 +28,17 @@ const tokenCache = {
     } catch (err) {
       return;
     }
+  },
+};
+
+const linking = {
+  prefixes: ['stationscout://'],
+  config: {
+    screens: {
+      Home: 'home',
+      Likes: 'likes',
+      Profile: 'profile/:id',
+    },
   },
 };
 
@@ -62,7 +72,7 @@ export default function App() {
     text = JSON.stringify(location);
   }
 
-  const onLayoutRootView = React.useCallback(async () => {
+  const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
       await SplashScreen.hideAsync();
     }
@@ -75,19 +85,20 @@ export default function App() {
   return (
     <ClerkProvider
       tokenCache={tokenCache}
-      publishableKey={Constants.expoConfig.extra.clerkPublishableKey}>
-      <UserLocation.Provider value={{location, setLocation}}>
-      <ThemeProvider>
-        <View style={styles.container} onLayout={onLayoutRootView}>
-          <SignedIn>
-            <NavigationContainer>
-              <TabNavigation />
-            </NavigationContainer>
-          </SignedIn>
-          <SignedOut>
-            <LoginScreen />
-          </SignedOut>
-        </View>
+      publishableKey={Constants.expoConfig.extra.clerkPublishableKey}
+    >
+      <UserLocation.Provider value={{ location, setLocation }}>
+        <ThemeProvider>
+          <View style={styles.container} onLayout={onLayoutRootView}>
+            <SignedIn>
+              <NavigationContainer linking={linking}>
+                <TabNavigation />
+              </NavigationContainer>
+            </SignedIn>
+            <SignedOut>
+              <LoginScreen />
+            </SignedOut>
+          </View>
         </ThemeProvider>
       </UserLocation.Provider>
     </ClerkProvider>

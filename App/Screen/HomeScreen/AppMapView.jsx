@@ -16,7 +16,7 @@ const AppMapView = ({ placeList }) => {
             <MapView
                 style={styles.map}
                 provider={PROVIDER_GOOGLE}
-                customMapStyle={isDarkMode ? MapViewStylesDark : MapViewStyles} // Set the map style based on the theme
+                customMapStyle={isDarkMode ? MapViewStylesDark : MapViewStyles} 
                 initialRegion={{
                     latitude: location.latitude,
                     longitude: location.longitude,
