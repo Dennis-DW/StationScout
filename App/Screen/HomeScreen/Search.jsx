@@ -8,11 +8,9 @@ import { GOOGLE_PLACES_API_KEY } from '@env';
 const Search = ({ searchedLocation }) => {
   return (
     <View style={styles.container}>
-      <IonIcons name="location-sharp" size={25}
-        color={Colors.GREY} paddingTop={5}
-      />
+      
       <GooglePlacesAutocomplete
-        placeholder="StationScout Search"
+        placeholder="⛽StationScout Search"
         fetchDetails={true}
         enablePoweredByContainer={false}
         onPress={(data, details = null) => {

@@ -11,6 +11,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import TabNavigation from './App/Navigations/TabNavigation';
 import * as Location from 'expo-location';
 import { UserLocation } from './App/Context/UserLocation';
+import { ThemeProvider } from './App/Context/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -76,6 +77,7 @@ export default function App() {
       tokenCache={tokenCache}
       publishableKey={Constants.expoConfig.extra.clerkPublishableKey}>
       <UserLocation.Provider value={{location, setLocation}}>
+      <ThemeProvider>
         <View style={styles.container} onLayout={onLayoutRootView}>
           <SignedIn>
             <NavigationContainer>
@@ -86,6 +88,7 @@ export default function App() {
             <LoginScreen />
           </SignedOut>
         </View>
+        </ThemeProvider>
       </UserLocation.Provider>
     </ClerkProvider>
   );

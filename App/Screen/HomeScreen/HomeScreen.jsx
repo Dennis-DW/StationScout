@@ -4,12 +4,14 @@ import { Header, AppMapView, Search, PlaceListView } from './index';
 import { UserLocation } from '../../Context/UserLocation';
 import GlobalApi from '../../utils/GlobalApi';
 import { SelectMarkerContext } from '../../Context/SelectMarkerContext';
+import { ThemeContext } from '../../Context/ThemeContext';
 
 const HomeScreen = () => {
   const { location, setLocation } = useContext(UserLocation);
   const [placeList, setPlaceList] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const { colors, isDarkMode } = useContext(ThemeContext); // Use the theme context
 
   useEffect(() => {
     if (location) {
@@ -65,7 +67,7 @@ const HomeScreen = () => {
 
   return (
     <SelectMarkerContext.Provider value={{ selectedMarker, setSelectedMarker }}>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.headerContainer}>
           <Header />
           <Search
