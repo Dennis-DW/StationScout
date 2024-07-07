@@ -1,5 +1,5 @@
-import React from 'react';
-import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid, Linking ,Platform} from 'react-native';
+import React, { useState, useContext } from 'react';
+import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid, Linking, Platform } from 'react-native';
 import Colors from '../utils/Colors';
 import StarRating from '../Components/StarRattings';
 import GlobalApi from '../utils/GlobalApi';
@@ -8,13 +8,15 @@ import { MaterialCommunityIcons, FontAwesome6 } from '@expo/vector-icons';
 import { app } from "../utils/firebaseConfig";
 import { doc, setDoc, deleteDoc, getFirestore } from "firebase/firestore";
 import { useUser } from "@clerk/clerk-expo";
-
+import { ThemeContext } from '../Context/ThemeContext'; // Import ThemeContext
 
 const { width } = Dimensions.get('screen');
 
 const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
     const PLACE_PHOTO_BASE_URL = "https://places.googleapis.com/v1/";
     const { user } = useUser();
+    const [liked, setLiked] = useState(isLiked); 
+    const { colors } = useContext(ThemeContext); // Consume ThemeContext
 
     const truncateName = (name) => {
         const words = name.split(' ');
@@ -37,6 +39,7 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
                 place: place,
                 userEmail: user.primaryEmailAddress?.emailAddress
             });
+            setLiked(true); 
             markedLiked();
             ToastAndroid.show("Liked station!", ToastAndroid.SHORT, ToastAndroid.CENTER);
         } catch (error) {
@@ -52,6 +55,7 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
     const onRemoveLiked = async (placeId) => {
         try {
             await deleteDoc(doc(db, "liked-stations", place.id.toString()));
+            setLiked(false); 
             markedLiked();
             ToastAndroid.show("Unliked station!", ToastAndroid.SHORT, ToastAndroid.CENTER);
         } catch (error) {
@@ -70,16 +74,16 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
 
     return (
         <Pressable onPress={onPress}>
-            <View style={styles.container}>
-                <LinearGradient colors={["transparent", "#ffffff", "#ffffff"]}>
+            <View style={[styles.container, { backgroundColor: colors.card }]}>
+                <LinearGradient colors={colors.gradient}>
                     <Pressable
                         style={styles.likeButton}
-                        onPress={() => isLiked ? onRemoveLiked(place.id) : onSetLiked(place)}
+                        onPress={() => liked ? onRemoveLiked(place.id) : onSetLiked(place)} // Use 'liked' state here
                     >
                         <MaterialCommunityIcons
-                            name={isLiked ? "heart-plus" : "heart-plus-outline"}
+                            name={liked ? "heart-plus" : "heart-plus-outline"} // Use 'liked' state here
                             size={32}
-                            color={isLiked ? "red" : "black"}
+                            color={liked ? "red" : "black"} // Use 'liked' state here
                         />
                     </Pressable>
                     <Image
@@ -93,7 +97,7 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
                     <View style={styles.textContainer}>
                         <Text style={styles.name}>{place?.displayName ? truncateName(place.displayName.text) : 'Unknown Station'}</Text>
                         <Text style={styles.address}>{place?.shortFormattedAddress || 'No Address Available'}</Text>
-                        <Text style={styles.openStatus}>
+                        <Text style={[styles.openStatus, { color: colors.openStatus }]}>
                             {place?.regularOpeningHours?.openNow ? "Open Now" : "Closed"}
                         </Text>
                     </View>
@@ -119,7 +123,6 @@ const styles = StyleSheet.create({
         shadowColor: Colors.BLACK,
         width: width * 0.915,
         borderRadius: 15,
-        backgroundColor: Colors.WHITE,
         margin: 5,
         height: 280,
         overflow: 'hidden',
@@ -167,7 +170,6 @@ const styles = StyleSheet.create({
         margin: 5,
     },
     openStatus: {
-        color: Colors.BLACK,
         fontFamily: "Exo-Bold",
         fontSize: 12,
         marginTop: 5,

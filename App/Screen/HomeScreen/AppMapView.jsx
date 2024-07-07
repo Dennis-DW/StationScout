@@ -1,19 +1,22 @@
 import React, { useContext } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import MapViewStyles from '../../utils/MapViewStyles.json'; 
+import MapViewStyles from '../../utils/MapViewStyles.json';
+import MapViewStylesDark from '../../utils/MapViewStylesDark.json'; 
 import { UserLocation } from '../../Context/UserLocation';
+import { ThemeContext } from '../../Context/ThemeContext';
 import Markers from '../../Components/Markers';
 
 const AppMapView = ({ placeList }) => {
     const { location } = useContext(UserLocation);
+    const { isDarkMode } = useContext(ThemeContext); 
 
     return (
         <View style={styles.container}>
             <MapView
                 style={styles.map}
                 provider={PROVIDER_GOOGLE}
-                customMapStyle={MapViewStyles} 
+                customMapStyle={isDarkMode ? MapViewStylesDark : MapViewStyles} // Set the map style based on the theme
                 initialRegion={{
                     latitude: location.latitude,
                     longitude: location.longitude,

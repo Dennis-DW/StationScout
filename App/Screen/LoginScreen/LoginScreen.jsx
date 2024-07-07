@@ -4,7 +4,7 @@ import Colors from '../../utils/Colors';
 import * as WebBrowser from 'expo-web-browser';
 import { useWarmUpBrowser } from '../../../hooks/useWarmUpBrowser';
 import { useOAuth } from '@clerk/clerk-expo';
-import { ThemeContext } from '../../Context/ThemeContext'; // Adjust the path as per your project structure
+import { ThemeContext } from '../../Context/ThemeContext';
 
 // Ensure to maybe complete any existing auth sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -14,7 +14,7 @@ const LoginScreen = () => {
 
   const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
 
-  const { colors, isDarkMode } = useContext(ThemeContext); // Accessing theme context
+  const { colors, isDarkMode } = useContext(ThemeContext);
 
   const onPress = async () => {
     try {
@@ -52,16 +52,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // marginTop: 10,
   },
   logoImage: {
-    width: 220,
-    height: 220,
+    width: 200,
+    height: 200,
     resizeMode: 'contain',
   },
   chargingStationImage: {
     width: '100%',
-    height: 310,
+    height: 250,
     resizeMode: 'cover',
   },
   heading: {
@@ -79,7 +78,7 @@ const styles = StyleSheet.create({
   loginButton: {
     width: 300,
     borderRadius: 25,
-    marginTop: 20,
+    marginTop: 10,
   },
   loginButtonText: {
     fontFamily: 'Exo-SemiBold',

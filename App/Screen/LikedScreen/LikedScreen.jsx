@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, Alert } from 'react-native';
 import LottieView from 'lottie-react-native';
-import Colors from '../../utils/Colors';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { app } from '../../utils/firebaseConfig';
@@ -78,7 +77,7 @@ const LikedScreen = () => {
           onRefresh={getLikedStations}
           refreshing={loading}
           renderItem={renderItem}
-          keyExtractor={(item, index) => `${item.place.id}-${index}`} // Ensure unique key
+          keyExtractor={(item, index) => `${item.place.id}-${index}`} 
           showsVerticalScrollIndicator={false}
         />
       )}

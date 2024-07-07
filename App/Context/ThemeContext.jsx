@@ -32,13 +32,14 @@ const ThemeProvider = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
-
 const lightColors = {
   background: Colors.WHITE,
   text: Colors.BLACK,
   primary: Colors.PRIMARY,
   secondary: Colors.SECONDARY,
-  // Add more color definitions here for the light theme
+  gradient: ["transparent", "#ffffff", "#ffffff"],
+  openStatus: Colors.BLACK,
+  card:Colors.WHITE
 };
 
 const darkColors = {
@@ -46,7 +47,10 @@ const darkColors = {
   text: Colors.WHITE,
   primary: Colors.PRIMARY,
   secondary: Colors.SECONDARY,
-  // Add more color definitions here for the dark theme
+  gradient: ["transparent", "#333333", "#333333"],
+  openStatus: Colors.WHITE,
+  card:Colors.BLACK2
 };
+
 
 export { ThemeContext, ThemeProvider };

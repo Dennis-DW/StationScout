@@ -11,7 +11,7 @@ const HomeScreen = () => {
   const [placeList, setPlaceList] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  const { colors, isDarkMode } = useContext(ThemeContext); // Use the theme context
+  const { colors, isDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     if (location) {
@@ -79,6 +79,7 @@ const HomeScreen = () => {
             }
           />
         </View>
+        {/* shows the map view and place list view */}
         {placeList && <AppMapView placeList={placeList} />}
         {!isKeyboardVisible && placeList.length > 0 && (
           <View style={styles.placeListContainer}>
