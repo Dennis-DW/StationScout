@@ -6,7 +6,7 @@ const config = {
     headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": API_KEY,
-        "X-Goog-FieldMask": ["places.id", "places.displayName", "places.photos", "places.fuelOptions", "places.location", "places.formattedAddress", "places.shortFormattedAddress", "places.priceLevel", "places.rating", "places.regularOpeningHours"]
+        "X-Goog-FieldMask": ["places.id", "places.displayName", "places.photos", "places.fuelOptions", "places.location", "places.formattedAddress", "places.shortFormattedAddress", "places.priceLevel", "places.rating", "places.regularOpeningHours","places.nationalPhoneNumber"]
     }
 }
 const NewNearByPlace = async (data) => {

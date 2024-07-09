@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid, Linking, Platform } from 'react-native';
+import { Text, View, StyleSheet, Image, Dimensions, Pressable, ToastAndroid, Linking, Platform, Alert } from 'react-native';
 import Colors from '../utils/Colors';
 import StarRating from '../Components/StarRattings';
 import GlobalApi from '../utils/GlobalApi';
@@ -64,11 +64,34 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
         }
     };
 
+    const confirmRemoveLiked = (placeId) => {
+        Alert.alert(
+            "Remove Liked Place",
+            "Are you sure you want to remove this liked place?",
+            [
+                {
+                    text: "No",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                },
+                {
+                    text: "Yes",
+                    onPress: () => onRemoveLiked(placeId),
+                }
+            ]
+        );
+    };
+
     const onDirection = () => {
         const url = Platform.select({
             ios: `maps:${place?.location?.latitude},${place?.location?.longitude}?q=${place?.formattedAddress}`,
             android: `geo:${place?.location?.latitude},${place?.location?.longitude}?q=${place?.formattedAddress}`
         })
+        Linking.openURL(url);
+    }
+
+    const onCall = (phoneNumber) => {
+        const url = `tel:${phoneNumber}`;
         Linking.openURL(url);
     }
 
@@ -78,7 +101,7 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
                 <LinearGradient colors={colors.gradient}>
                     <Pressable
                         style={styles.likeButton}
-                        onPress={() => liked ? onRemoveLiked(place.id) : onSetLiked(place)} // Use 'liked' state here
+                        onPress={() => liked ? confirmRemoveLiked(place.id) : onSetLiked(place)} // Use confirmation dialog here
                     >
                         <MaterialCommunityIcons
                             name={liked ? "heart-plus" : "heart-plus-outline"} // Use 'liked' state here
@@ -97,9 +120,18 @@ const PlaceItem = ({ place, isLiked, markedLiked, onPress }) => {
                     <View style={styles.textContainer}>
                         <Text style={styles.name}>{place?.displayName ? truncateName(place.displayName.text) : 'Unknown Station'}</Text>
                         <Text style={styles.address}>{place?.shortFormattedAddress || 'No Address Available'}</Text>
-                        <Text style={[styles.openStatus, { color: colors.openStatus }]}>
-                            {place?.regularOpeningHours?.openNow ? "Open Now" : "Closed"}
-                        </Text>
+                        <View style={styles.statusContainer}>
+                            <Text style={[styles.openStatus, { color: colors.openStatus }]}>
+                                {place?.regularOpeningHours?.openNow ? "Open Now" : "Closed"}
+                            </Text>
+                            {place?.nationalPhoneNumber ? (
+                                <Pressable onPress={() => onCall(place.nationalPhoneNumber)}>
+                                    <Text style={styles.phoneNumber}>{place.nationalPhoneNumber}</Text>
+                                </Pressable>
+                            ) : (
+                                <Text style={styles.phoneNumber}>No Available Contact</Text>
+                            )}
+                        </View>
                     </View>
                     <View style={styles.ratingContainer}>
                         <Text style={styles.ratingText}>Rates:</Text>
@@ -173,5 +205,15 @@ const styles = StyleSheet.create({
         fontFamily: "Exo-Bold",
         fontSize: 12,
         marginTop: 5,
+    },
+    phoneNumber: {
+        fontFamily: "Exo-Regular",
+        fontSize: 12,
+        marginTop: 5,
+        color: Colors.OTHER,
+    },
+    statusContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
 });
