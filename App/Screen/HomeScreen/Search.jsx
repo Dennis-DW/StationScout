@@ -2,14 +2,17 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Colors from '../../utils/Colors';
-import IonIcons from 'react-native-vector-icons/Ionicons';
+import IonIcons from 'react-native-vector-icons/Ionicons'; 
 import { GOOGLE_PLACES_API_KEY } from '@env';
 
 const Search = ({ searchedLocation }) => {
+  // Log API key length (optional)
+  console.log('API Key Length:', GOOGLE_PLACES_API_KEY ? GOOGLE_PLACES_API_KEY.length : 'API key not loaded');
+
   return (
     <View style={styles.container}>
       <GooglePlacesAutocomplete
-        placeholder="⛽StationScout Search"
+        placeholder="⛽ StationScout Search"
         fetchDetails={true}
         enablePoweredByContainer={false}
         onPress={(data, details = null) => {
@@ -19,7 +22,7 @@ const Search = ({ searchedLocation }) => {
           );
         }}
         query={{
-          key: GOOGLE_PLACES_API_KEY,
+          key: GOOGLE_PLACES_API_KEY, 
           language: 'en',
         }}
         styles={{
@@ -48,7 +51,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     height: 35,
-    fontFamily: "Exo-SemiBold",
+    fontFamily: "Exo-SemiBold", 
     fontSize: 16,
     marginBottom: 10,
   },
